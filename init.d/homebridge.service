@@ -1,0 +1,51 @@
+[Unit]
+Description=Homebridge - HomeKit bridge with web UI (TOS)
+Documentation=https://github.com/homebridge/homebridge/wiki
+After=network-online.target
+Wants=network-online.target
+StartLimitBurst=5
+StartLimitIntervalSec=60
+
+[Service]
+Type=simple
+User=homebridge
+Group=homebridge
+# storage (config.json, plugins, persist/) is cwd-relative per upstream
+WorkingDirectory=/var/lib/homebridge
+# upstream start.sh: exports PATH (bundled node first), cd's into the
+# storage path, then execs `node hb-service.js run -I -U storage -P plugins`
+ExecStart=/opt/homebridge/start.sh
+TimeoutStartSec=90
+TimeoutStopSec=15
+
+# Security hardening (TOS 7 review requires NoNewPrivileges/ProtectSystem/ProtectHome;
+# Restart= is intentionally omitted — service lifecycle is managed by the platform).
+# MemoryDenyWriteExecute is intentionally omitted: Node/V8 JIT needs RWX pages
+# on this kernel family (same crash class as the go2rtc/owncast Go runtimes).
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictRealtime=true
+LockPersonality=true
+RestrictSUIDSGID=true
+RemoveIPC=true
+SystemCallArchitectures=native
+
+# /opt/homebridge writable: UI "Update Homebridge" self-update (npm_config_prefix)
+# /var/lib/homebridge writable: storage (config.json, plugins, persist/)
+ReadWritePaths=/opt/homebridge /var/lib/homebridge
+
+# HAP bridge binds random 51xxx ports; mDNS discovery via bundled multicast-dns
+# (no avahi dependency — TOS does not ship it; upstream unit relies on its own
+# multicast implementation too)
+AmbientCapabilities=CAP_NET_BIND_SERVICE CAP_NET_RAW
+
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target

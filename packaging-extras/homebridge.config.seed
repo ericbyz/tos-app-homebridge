@@ -1,0 +1,9 @@
+{
+  "platforms": [
+    {
+      "name": "Config",
+      "port": 18246,
+      "platform": "config"
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+#!/bin/bash
+set -e
+APPID="homebridge"
+case "$1" in
+    remove|deconfigure)
+        systemctl stop "homebridge.service" 2>/dev/null || true
+        systemctl disable "homebridge.service" 2>/dev/null || true
+        ;;
+    upgrade|failed-upgrade) ;;
+    *) ;;
+esac
+exit 0

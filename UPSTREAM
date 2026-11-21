@@ -1,0 +1,22 @@
+# Upstream project pin — single source of truth for reproducible builds.
+# homebridge is packaged from the official homebridge-apt-pkg deb
+# (homebridge/homebridge-apt-pkg, Apache-2.0) — self-contained: bundles its
+# own Node.js runtime (glibc 2.28+, compatible with TOS 7's glibc 2.35).
+# IMPORTANT: the payload ships VERBATIM — streamed member-by-member from the
+# upstream data.tar.xz, never staged on disk (Windows cannot represent the
+# relative symlinks bin/npm -> ../lib/node_modules/...). Upstream paths stay
+# at /opt/homebridge + /var/lib/homebridge (start.sh hardcodes them; storage
+# is cwd-relative). Only a TOS-hardened systemd unit, TOS metadata
+# (config.ini/lang/icon) and docs are added by this repository.
+
+UPSTREAM_REPO=https://github.com/homebridge/homebridge-apt-pkg
+UPSTREAM_LICENSE=Apache-2.0
+
+UPSTREAM_TAG=v1.7.12
+UPSTREAM_VERSION=1.7.12
+
+ASSET_x86_64=homebridge_v1.7.12_amd64.deb
+ASSET_aarch64=homebridge_v1.7.12_arm64.deb
+
+SHA256_x86_64=be7ffb0cf849ca731408b27efec500dc2cf26da32a36a3276a86436092a6774a
+SHA256_aarch64=d6ba4ae4b6011c3c9a4f213553fb65ada135985077a69dbf14fbcd6a35b0b101

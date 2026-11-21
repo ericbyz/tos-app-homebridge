@@ -1,0 +1,9 @@
+# build artifacts
+build/
+.upstream-cache/
+*.deb
+*.sha256
+
+# python bytecode
+__pycache__/
+*.pyc

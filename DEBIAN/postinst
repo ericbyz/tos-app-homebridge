@@ -1,0 +1,57 @@
+#!/bin/bash
+# Post-installation script — runs after the package is installed
+set -e
+
+APPID="homebridge"
+APP_DIR="/opt/homebridge"
+
+if ! id -u "${APPID}" > /dev/null 2>&1; then
+    # home = storage path so npm caches land somewhere writable
+    useradd --system --no-create-home --home /var/lib/homebridge --shell /usr/sbin/nologin "${APPID}" 2>/dev/null || true
+fi
+
+chown -R "${APPID}:${APPID}" "${APP_DIR}" 2>/dev/null || true
+
+# Storage dir (config.json, plugins, persist/) is cwd-relative per upstream
+mkdir -p /var/lib/homebridge 2>/dev/null || true
+chown -R "${APPID}:${APPID}" /var/lib/homebridge 2>/dev/null || true
+
+# UI port seed (18246). The 'platform: config' block in config.json is the
+# authoritative UI port; hb-service only auto-creates it on first run (via
+# getLastKnownUiPort -> /etc/hb-ui-port), so we seed both deterministically.
+# The bridge block (MAC/pin/port) is deliberately omitted: hb-service
+# generates a complete one on first run when it is missing.
+if [ ! -f /var/lib/homebridge/config.json ]; then
+    cat > /var/lib/homebridge/config.json <<CFGEOF
+{
+  "platforms": [
+    {
+      "name": "Config",
+      "port": 18246,
+      "platform": "config"
+    }
+  ]
+}
+CFGEOF
+    chown "${APPID}:${APPID}" /var/lib/homebridge/config.json
+    echo "homebridge: seeded config.json (UI port 18246)"
+fi
+if [ ! -f /etc/hb-ui-port ]; then
+    echo 18246 > /etc/hb-ui-port
+fi
+
+case "$1" in
+    configure)
+        if [ -n "$2" ]; then
+            echo "${APPID}: upgrading from version $2 (config and plugins preserved)"
+        fi
+        systemctl daemon-reload 2>/dev/null || true
+        systemctl enable "homebridge.service" 2>/dev/null || true
+        systemctl start "homebridge.service" 2>/dev/null || true
+        ;;
+    *) ;;
+esac
+
+echo "${APPID} installed successfully."
+echo "  web UI: http://<NAS>:18246 (pair Homebridge to Apple Home from there)"
+exit 0

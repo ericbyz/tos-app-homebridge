@@ -1,0 +1,20 @@
+Package: homebridge
+Version: 1.7.12
+Architecture: amd64
+Section: net
+Priority: optional
+Maintainer: ericbyz <ericbyz@users.noreply.github.com>
+Depends: libc6 (>= 2.31), jq, openssl, psmisc, net-tools, python3, systemd
+Description: HomeKit bridge for smart home devices with web UI (Homebridge)
+ Homebridge bridges hundreds of smart-home accessories that don't natively
+ support HomeKit into Apple Home — and its web UI lets you manage plugins,
+ pair devices and control everything from any browser at
+ http://<NAS>:18246. Ships its own Node.js runtime; upstream payload is
+ packaged verbatim at /opt/homebridge (start.sh hardcodes the path), with
+ storage at /var/lib/homebridge.
+ Upstream project: https://github.com/homebridge/homebridge (Apache-2.0),
+ official build from homebridge-apt-pkg.
+ .
+ Native plugin compilation via the UI additionally needs make/gcc/g++/
+ python3-dev (not required for the bridge itself; install manually if a
+ plugin asks for it).

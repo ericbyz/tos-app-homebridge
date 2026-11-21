@@ -1,0 +1,24 @@
+# NOTICE — tos-app-homebridge
+
+This package redistributes the official `homebridge-apt-pkg` release deb
+(https://github.com/homebridge/homebridge-apt-pkg), produced by the Homebridge
+project and licensed under the Apache License 2.0. The upstream payload —
+including the bundled Node.js runtime and all node_modules — ships verbatim;
+this repository only adds TOS packaging metadata, a TOS-hardened systemd unit
+and documentation.
+
+Deviations from the pipeline's usual conventions (deliberate, documented):
+
+1. Application directory is `/opt/homebridge` (not `/usr/local/homebridge`):
+   upstream `start.sh` hardcodes that path, and rebasing 24k files plus
+   relative symlinks would risk subtle breakage for zero functional gain.
+2. Storage is `/var/lib/homebridge` (upstream convention, cwd-relative).
+3. The upstream `lib/systemd/system/homebridge.service` member is replaced by
+   a TOS-hardened unit (dedicated `homebridge` system user, sandboxing, UI
+   port 18246). The web UI port is changed from upstream's default 8581 to
+   18246 via the `platform: config` block seed in config.json (postinst).
+
+Third-party licenses: the bundled Node.js runtime (MIT, see
+/opt/homebridge/LICENSE) and npm dependencies (various permissive licenses,
+see each package under /opt/homebridge/lib/node_modules and
+/var/lib/homebridge/node_modules) keep their upstream license files in place.
