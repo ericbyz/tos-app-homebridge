@@ -89,6 +89,19 @@ import make_lang
 make_lang.render(out)
 PYEOF
 
+    # TOS platform metadata must ALSO exist at the standard layout:
+    # the Developer Platform hard-requires
+    # usr/local/<AppID>/{config.ini,<AppID>.lang,images/icons/<AppID>.svg}
+    # (agent-api §6.5.2a — missing these fails missing_required_files).
+    # Copies only; the /opt/homebridge originals stay authoritative.
+    mkdir -p "${staging}/add/usr/local/homebridge/images/icons"
+    install -m 644 "${staging}/add/opt/homebridge/config.ini" \
+        "${staging}/add/usr/local/homebridge/config.ini"
+    install -m 644 "${staging}/add/opt/homebridge/homebridge.lang" \
+        "${staging}/add/usr/local/homebridge/homebridge.lang"
+    install -m 644 "${staging}/add/opt/homebridge/images/icons/homebridge.svg" \
+        "${staging}/add/usr/local/homebridge/images/icons/homebridge.svg"
+
     # TOS-hardened unit: shipped BOTH at the systemd path (replacing the
     # upstream member) and inside the app dir (unpack_check + forensic copy)
     install -m 644 init.d/homebridge.service "${staging}/add/lib/systemd/system/homebridge.service"

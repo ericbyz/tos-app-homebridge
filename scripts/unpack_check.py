@@ -39,6 +39,9 @@ REQUIRED_FILES = [
     "./opt/homebridge/homebridge.lang",
     "./opt/homebridge/init.d/homebridge.service",
     "./opt/homebridge/images/icons/homebridge.svg",
+    "./usr/local/homebridge/config.ini",
+    "./usr/local/homebridge/homebridge.lang",
+    "./usr/local/homebridge/images/icons/homebridge.svg",
     "./var/lib/homebridge/package.json",
     "./var/lib/homebridge/node_modules/homebridge/package.json",
     "./lib/systemd/system/homebridge.service",
@@ -47,6 +50,15 @@ REQUIRED_FILES = [
     "./usr/share/doc/homebridge/copyright",
     "./usr/share/doc/homebridge/changelog.gz",
 ]
+
+# platform-mandated standard-layout metadata (agent-api §6.5.2a) must be
+# byte-identical to the authoritative /opt/homebridge copies
+METADATA_MIRRORS = {
+    "./usr/local/homebridge/config.ini": "./opt/homebridge/config.ini",
+    "./usr/local/homebridge/homebridge.lang": "./opt/homebridge/homebridge.lang",
+    "./usr/local/homebridge/images/icons/homebridge.svg":
+        "./opt/homebridge/images/icons/homebridge.svg",
+}
 
 
 def err(msg):
@@ -136,6 +148,11 @@ def main() -> int:
             return err(f"config.ini platform != {platform}: {c.get('platform')}")
         if "18246" not in c.get("path", ""):
             return err(f"config.ini path port != 18246: {c.get('path')}")
+
+        # standard-layout metadata mirrors must match /opt originals byte-for-byte
+        for mirror, source in METADATA_MIRRORS.items():
+            if tf.extractfile(mirror).read() != tf.extractfile(source).read():
+                return err(f"{mirror} != {source} (metadata mirror drifted)")
 
         # ELF machine scan. Upstream legitimately ships multiarch prebuilds
         # (node-pty: linux-x64/arm64/arm/ia32 all in ONE package), so ELFs
